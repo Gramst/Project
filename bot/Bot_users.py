@@ -71,4 +71,5 @@ class Users:
         ...
 
 
-    def get_searched_name(self, user_id)
+    def get_searched_name(self, user_id):
+        ...

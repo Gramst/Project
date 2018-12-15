@@ -47,9 +47,9 @@ keyboards = {
     [
     ["Сбербанк", "ОТП Банк"],
     ["Райфайзен", "Тула Банк"],
-    ['Любой ближайший']
+    ['Любой ближайший'],
     ['Отмена']
-    ]    
+    ],
     'sett_keyboard' : 
     [
     [KeyboardButton('Тест гео', request_location=True)],
@@ -102,7 +102,7 @@ def atm_search(bot, update):
     user_id = update.message.chat.id
     users.set_state(user_id, 'atm')
     text = b_text.atm_search_t
-    reyboard = keyboards['need_geo']
+    keyboard = keyboards['need_geo']
 
     return text, keyboard
 
@@ -136,23 +136,24 @@ def f_atm_get_location(bot, update, longitude, latitude):
 def f_atm_get_bank_name(bot, update):
     user_id = update.message.chat.id
 
-    if update.message.text != 'Любой ближайший'
+    if update.message.text != 'Любой ближайший':
         users.add_searched_name(user_id, update.message.text)
         text = b_text.atm_search_get_name_t.format(update.message.text)
     else:
-
+        ...
     ...
 
 
 def proc_message(bot, update):
 
+    user_id = update.message.chat.id
     state = users.get_state(user_id)
     print(state)
 
-    if state == error:
+    if state == 'error':
         f_cancel(bot, update)
 
-    elif state = 'atm':
+    elif state == 'atm':
         f_atm_get_bank_name(bot, update)
 
     else:

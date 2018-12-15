@@ -39,13 +39,14 @@ class Yndx_api:
         except TypeError as error:
             f_result = False
             return f_result, error
-return f_result, part_row_adress
+
+        return f_result, part_row_adress
                         
 
     def get_location(self, longitude, latitude):
 
         raw_data = self._get_raw_data_geokode(longitude, latitude)
-        self._dump_json(raw_data, s'geo_lo{longitude}la{latitude}')
+        self._dump_json(raw_data, f'geo_lo{longitude}la{latitude}')
         f_result, adress = self._get_geo_adress_from_raw(raw_data)
         result = adress #TODO обработать флаг результата
 
@@ -63,7 +64,7 @@ return f_result, part_row_adress
     def search_atm(self, longitude, latitude, requested_atm):
 
         raw_data = self._get_raw_data_search(longitude, latitude, requested_atm)
-        self._dump_json(raw_data, s'search_lo{longitude}la{latitude}')
+        self._dump_json(raw_data, f'search_lo{longitude}la{latitude}')
         f_result, d_of_adress = self._get_search_adress_from_raw(raw_data)
         result = d_of_adress #TODO обработать флаг результата
 
