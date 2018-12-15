@@ -1,0 +1,6 @@
+bot/Bot_settings.py
+*.pyc
+bot/bot.log
+bot/venv/*
+bot/.idea/*
+bot/data/*
