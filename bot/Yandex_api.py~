@@ -54,10 +54,9 @@ class Yndx_api:
 
 
     def _get_raw_data_search(self, longitude, latitude, requested_atm):
-        
-        url = 'https://search-maps.yandex.ru/v1/?text={0}&ll={1},{2}&results=1&spn=0.552069,0.400552&type=biz&lang=ru_RU&apikey={3}'\
-                .format( requested_atm, longitude, latitude, Y_TOKEN)
-        
+        ...
+
+
     def _get_search_adress_from_raw(self, raw_data):
         ...
 

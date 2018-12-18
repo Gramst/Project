@@ -4,3 +4,10 @@ bot/bot.log
 bot/venv/*
 bot/.idea/*
 bot/data/*
+.venv/*
+.ipynb_checkpoints/*
+*.ipynb
+Jupyter_tests/*
+.*
+test/*
+search/*
