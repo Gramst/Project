@@ -55,11 +55,20 @@ class Yndx_api:
 
     def _get_raw_data_search(self, longitude, latitude, requested_atm):
         
-        url = 'https://search-maps.yandex.ru/v1/?text={0}&ll={1},{2}&results=1&spn=0.552069,0.400552&type=biz&lang=ru_RU&apikey={3}'\
-                .format( requested_atm, longitude, latitude, Y_TOKEN)
+        url = self.base_search_url + '&text={0}&ll={1},{2}&results=1&spn=0.552069,0.400552&type=biz&lang=ru_RU'\
+                .format( requested_atm, longitude, latitude)
+        raw_data = requests.get(url).json()
+        return raw_data
         
     def _get_search_adress_from_raw(self, raw_data):
-        ...
+        atms = []
+        for company in raw_data['features']:
+            atm = {}
+            atm['name'] = company['properties']['name']
+            atm['geo'] = company['geometry']['coordinates']
+            atm['time'] = company['properties']['CompanyMetaData']['Hours']['text']
+            atms.append(atm)
+        return True, atms
 
 
     def search_atm(self, longitude, latitude, requested_atm):

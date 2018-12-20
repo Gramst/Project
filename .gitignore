@@ -11,3 +11,5 @@ Jupyter_tests/*
 .*
 test/*
 search/*
+*.py~
+bot/*.py~

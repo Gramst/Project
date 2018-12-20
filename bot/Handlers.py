@@ -105,28 +105,29 @@ def user_settings(bot, update):
     return text, keyboard
 
 
-@send
 def f_settings_get_location(bot, update, longitude, latitude):
     text = yandex.get_location(longitude,latitude)
     keyboard = keyboards['sett_keyboard']
-    return text, keyboard
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
 
-@send
 def f_atm_get_location(bot, update, longitude, latitude, atm):
-    ...
-
-
-@send
+    text = yandex.search_atm(longitude, latitude, atm)
+    update.message.reply_text(text)
+    
 def f_atm_get_bank_name(bot, update):
     user_id = update.message.chat.id
 
     if update.message.text != 'Любой ближайший':
-        users.add_searched_name(user_id, update.message.text+' банкомат')
+        print(update.message.text)
+        users.add_searched_name(user_id, update.message.text)
         text = b_text.atm_search_get_name_t.format(update.message.text)
     else:
-        users.add_searched_name('Банкомат')
+        users.add_searched_name(user_id, 'Банкомат')
         text = b_text.atm_search_get_name_t.format(update.message.text)
+
+    update.message.reply_text(text)
 
 
 def proc_message(bot, update):

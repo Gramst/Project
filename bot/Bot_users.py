@@ -69,13 +69,11 @@ class Users:
 
     def add_searched_name(self, user_id, text):
         self.check_user(user_id)
-        self.users['user_id']['atm']
+        self.users[user_id]['atm'] = text
+
 
     def get_searched_name(self, user_id):
         self.check_user(user_id)
-        return self.users['user_id']['atm']
+        return self.users[user_id]['atm']
 
 
-    def add_searched_name(user_id, name_atm_bank):
-        self.check_user(user_id)
-        self.users['user_id']['searched_name'] = name_atm_bank
