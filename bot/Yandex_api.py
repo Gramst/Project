@@ -55,7 +55,7 @@ class Yndx_api:
 
     def _get_raw_data_search(self, longitude, latitude, requested_atm):
         
-        url = self.base_search_url + '&text={0}&ll={1},{2}&results=1&spn=0.552069,0.400552&type=biz&lang=ru_RU'\
+        url = self.base_search_url + '&text={0}&ll={1},{2}&results=5&spn=0.552069,0.400552&type=biz&lang=ru_RU'\
                 .format( requested_atm, longitude, latitude)
         raw_data = requests.get(url).json()
         return raw_data
@@ -68,7 +68,10 @@ class Yndx_api:
             atm['geo'] = company['geometry']['coordinates']
             atm['time'] = company['properties']['CompanyMetaData']['Hours']['text']
             atms.append(atm)
-        return True, atms
+        text = ''
+        for atm in atms:
+            text += atm['name'] + '\n' + '***\n' + atm['time'] + '\n\n'
+        return True, text
 
 
     def search_atm(self, longitude, latitude, requested_atm):

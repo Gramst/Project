@@ -43,15 +43,6 @@ keyboards = {
 }
 
 
-def send(my_bot_f):
-    def wrapper_arg(bot, update):
-        text, keyboard = my_bot_f(bot, update)
-        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-        update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
-    return wrapper_arg
-
-
-@send
 def greet_user(bot, update):
     user_id = update['message']['chat']['id']
 
@@ -63,10 +54,10 @@ def greet_user(bot, update):
         
     keyboard = keyboards['global_keyboard']
 
-    return text, keyboard
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
 
-@send
 def f_cancel(bot, update):
 
     user_id = update.message.chat.id
@@ -75,35 +66,35 @@ def f_cancel(bot, update):
     text = b_text.reset_t + '\n' + b_text.help_t
     keyboard = keyboards['global_keyboard']
     
-    return text, keyboard
 
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
 def money_exchange(bot, update):
     pass
 
 
-@send
 def atm_search(bot, update):
     user_id = update.message.chat.id
     users.set_state(user_id, 'atm')
     text = b_text.atm_search_t
-    keyboard = keyboards['need_geo']
+    keyboard = keyboards['atm_search_k'] 
 
-    return text, keyboard
 
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
 def money_search(bot, update):
     pass
 
-@send
 def user_settings(bot, update):
     user_id = update.message.chat.id
     users.set_state(user_id, 'sett')
     text = b_text.settings_t
     keyboard = keyboards['sett_keyboard']
-    
-    return text, keyboard
 
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
 def f_settings_get_location(bot, update, longitude, latitude):
     text = yandex.get_location(longitude,latitude)
@@ -127,7 +118,9 @@ def f_atm_get_bank_name(bot, update):
         users.add_searched_name(user_id, 'Банкомат')
         text = b_text.atm_search_get_name_t.format(update.message.text)
 
-    update.message.reply_text(text)
+    keyboard = keyboards['need_geo']
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
 
 def proc_message(bot, update):
