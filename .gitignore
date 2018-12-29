@@ -4,3 +4,5 @@ bot/bot.log
 bot/venv/*
 bot/.idea/*
 bot/data/*
+env/
+parser/*.csv
