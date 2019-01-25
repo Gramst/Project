@@ -1,8 +1,10 @@
-import csv
-#import requests
 from bs4 import BeautifulSoup
+import csv
+from datetime import datetime
 import os
 from selenium import webdriver
+
+import settings
 
 def get_html_selenium(url):
     options = webdriver.ChromeOptions()
@@ -15,7 +17,7 @@ def get_html_selenium(url):
 
 def get_exchangers_rates(html, fields, currency):
     soup = BeautifulSoup(html, 'html.parser')
-    rows_exchagers = soup.findAll('div', class_='table-flex__row item calculator-hover-icon__container')
+    rows_exchagers = soup.findAll('div', class_=settings.EXCH_DIV)
     exchangers_table = []
 
     for row in rows_exchagers:
@@ -31,7 +33,7 @@ def get_exchangers_rates(html, fields, currency):
 
 def get_banks_rates(html, fields, currency):
     soup = BeautifulSoup(html, 'html.parser')
-    rows_banks = soup.findAll('tr', class_='calculator-hover-icon__container exchange-calculator-rates ')
+    rows_banks = soup.findAll('tr', class_=settings.BANKS_TR)
     banks_table = []
 
     for row in rows_banks:
@@ -44,11 +46,23 @@ def get_banks_rates(html, fields, currency):
 
     return banks_table
 
-def save_csv(result_table, save_file, fields):
-    csv_dir = 'csv_files'
+def save_csv(result_table, save_file, fields, csv_dir):
     os.makedirs(csv_dir, exist_ok = True)
     with open(os.path.join(csv_dir, save_file), "w", encoding="utf8", newline='') as csvf:
         writer = csv.DictWriter(csvf, fields, delimiter=';')
         writer.writeheader()
         for row in result_table:
             writer.writerow(row)
+
+def get_banki_ru_rates(currency):
+    url = 'http://www.banki.ru/products/currency/cash/{}/moskva/#bank-rates'.format(currency)
+    fields = ['dep_name', 'bank_name', '{}_buy'.format(currency), '{}_sell'.format(currency), 'update_time']
+    file_exchangers = 'banki-ru-exchangers-{}_{}.csv'.format(currency, datetime.now().strftime('%Y%m%d-%H%M%S'))
+    file_banks = 'banki-ru-banks-{}_{}.csv'.format(currency, datetime.now().strftime('%Y%m%d-%H%M%S'))
+
+    html = get_html_selenium (url)
+
+    if html:
+        #for exchangers currency need uppercase
+        save_csv(get_exchangers_rates(html, fields, currency.upper()), file_exchangers, fields, settings.CSV_DIR)
+        save_csv(get_banks_rates(html, fields[1:], currency), file_banks, fields[1:], settings.CSV_DIR)
