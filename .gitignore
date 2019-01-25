@@ -5,4 +5,4 @@ bot/venv/*
 bot/.idea/*
 bot/data/*
 env/
-parser/*.csv
+parser/csv_files/
