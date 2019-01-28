@@ -7,10 +7,10 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Regex
 import Bot_settings as sett
 from Handlers import greet_user, atm_search, user_settings, proc_location, f_cancel, proc_location, proc_message
 from Bot_users import Users
-from Yandex_api import Yndx_api
+from Yandex_api import YandexApi
 
 users = Users(sett.PATH)
-yandex = Yndx_api(sett.Y_TOKEN, sett.PATH)
+yandex = YandexApi(sett.Y_TOKEN, sett.PATH)
 
 
 

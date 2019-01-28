@@ -1,12 +1,12 @@
 from telegram import ReplyKeyboardMarkup, KeyboardButton,InlineKeyboardButton, InlineKeyboardMarkup
 
 from Bot_users import Users
-from Yandex_api import Yndx_api
+from Yandex_api import YandexApi
 import Bot_text as b_text
 import Bot_settings as sett
 
 users = Users(sett.PATH)
-yandex = Yndx_api(sett.Y_TOKEN, sett.PATH)
+yandex = YandexApi(sett.Y_TOKEN, sett.PATH)
 
 keyboards = {
 
@@ -42,6 +42,26 @@ keyboards = {
     ],
 }
 
+def bild_inline_keyboard(self_coord=None, list_bank_coordinates=None):
+    #TODO проверка нанов
+    sc = self_coord
+    lbc = list_bank_coordinates
+    atm_out = []
+    n = 1
+    for atm in lbc:
+        line = [InlineKeyboardButton("ATM {0}".format(n), callback_data='sln={0}slt{1}tln={2}tlt{3}'\
+            .format(sc[0],sc[1],atm['geo'][0],atm['geo'][1]))] #,atm['name']))]
+        atm_out.append(line[0])
+        n+=1
+    print(atm_out)
+    menu = [] 
+    i = 0
+    while i<len(atm_out):
+        menu.append(atm_out[i:i+3])
+        i+=3
+    print(menu)
+    reply_markup = InlineKeyboardMarkup(menu)
+    return reply_markup
 
 def greet_user(bot, update):
     user_id = update['message']['chat']['id']
@@ -104,11 +124,20 @@ def f_settings_get_location(bot, update, longitude, latitude):
 
 
 def f_atm_get_location(bot, update, longitude, latitude, atm):
-    text = yandex.search_atm(longitude, latitude, atm)
-    update.message.reply_text(text)
+    text, ld_of_atms = yandex.search_atm(longitude, latitude, atm)
+    #keyboard = keyboards['atm_out']
+    reply_markup = bild_inline_keyboard([longitude, latitude], ld_of_atms) 
+    update.message.reply_text(text, reply_markup=reply_markup)
     
-def f_atm_get_bank_name(bot, update):
+def f_get_bank_name(bot, update):
     user_id = update.message.chat.id
+   
+    state_user = users.get_state(user_id)
+
+    if state_user == 'atm':
+        searched_name == 'банкомат'
+    elif state_user == 'error' or state_user == None:
+        f_cancel()
 
     if update.message.text != 'Любой ближайший':
         print(update.message.text)
@@ -117,6 +146,22 @@ def f_atm_get_bank_name(bot, update):
     else:
         users.add_searched_name(user_id, 'Банкомат')
         text = b_text.atm_search_get_name_t.format(update.message.text)
+
+    keyboard = keyboards['need_geo']
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+
+def f_atm_get_bank_name(bot, update):
+    user_id = update.message.chat.id
+
+    if update.message.text != 'Любой ближайший':
+        print(update.message.text)
+        users.add_searched_name(user_id, update.message.text)
+    else:
+        users.add_searched_name(user_id, 'Банкомат')
+
+    text = b_text.atm_search_get_name_t.format(update.message.text)
 
     keyboard = keyboards['need_geo']
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)

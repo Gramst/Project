@@ -7,7 +7,7 @@ import json
 # https://geocode-maps.yandex.ru/1.x/?apikey=<Ваш API-ключ>&geocode=37.611347,55.760241
 # {'longitude': 44.5458, 'latitude': 48.512331}
 
-class Yndx_api:
+class YandexApi:
 
     def __init__(self, api_key, path):
 
@@ -65,20 +65,26 @@ class Yndx_api:
         for company in raw_data['features']:
             atm = {}
             atm['name'] = company['properties']['name']
+            print('atm_data')
+            print(atm['name'])
             atm['geo'] = company['geometry']['coordinates']
+            print(atm['geo'])
             atm['time'] = company['properties']['CompanyMetaData']['Hours']['text']
+            print(atm['time'])
             atms.append(atm)
         text = ''
+        n = 1
         for atm in atms:
-            text += atm['name'] + '\n' + '***\n' + atm['time'] + '\n\n'
-        return True, text
+            text +=str(n) + ')' + atm['name'] + '\n' + '***\n' + atm['time'] + '\n\n'
+            n+=1
+        return True, text, atms
 
 
     def search_atm(self, longitude, latitude, requested_atm):
 
         raw_data = self._get_raw_data_search(longitude, latitude, requested_atm)
         self._dump_json(raw_data, f'search_lo{longitude}la{latitude}')
-        f_result, d_of_adress = self._get_search_adress_from_raw(raw_data)
-        result = d_of_adress #TODO обработать флаг результата
+        f_result, text,  d_of_adress = self._get_search_adress_from_raw(raw_data)
+        result = text #TODO обработать флаг результата
 
-        return result
+        return result, d_of_adress
