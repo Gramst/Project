@@ -71,11 +71,13 @@ class YandexApi:
             print(atm['geo'])
             atm['time'] = company['properties']['CompanyMetaData']['Hours']['text']
             print(atm['time'])
+            atm['address'] = company['properties']['CompanyMetaData']['address']
+            print(atm['address'])
             atms.append(atm)
         text = ''
         n = 1
         for atm in atms:
-            text +=str(n) + ')' + atm['name'] + '\n' + '***\n' + atm['time'] + '\n\n'
+            text +=str(n) + ')' + atm['name'] + '\n' + '***\n' + atm['address'] + '\n'  + atm['time'] + '\n\n'
             n+=1
         return True, text, atms
 

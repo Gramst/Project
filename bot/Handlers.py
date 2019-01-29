@@ -207,8 +207,8 @@ def f_callback(bot, update):
     print('f_callback')
     user_id = update.callback_query.message.chat.id
     rs = re.findall(r'mode=(.)sln=(.*)slt(.*)tln=(.*)tlt(.*)', update.callback_query.data)
-    text = yandex.get_url_static_map(rs[0][1], rs[0][2], rs[0][3], rs[0][4])
+    text = '[банкомат](' + yandex.get_url_static_map(rs[0][1], rs[0][2], rs[0][3], rs[0][4]) + ')'
     keyboard = keyboards['global_keyboard']
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-    bot.send_message(chat_id=user_id, text=text) #, reply_markup=reply_markup, parse_mode="Markdown")
+    bot.send_message(chat_id=user_id, text=text, parse_mode='Markdown') #, reply_markup=reply_markup, parse_mode="Markdown")
 
