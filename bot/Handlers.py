@@ -1,3 +1,4 @@
+import re
 from telegram import ReplyKeyboardMarkup, KeyboardButton,InlineKeyboardButton, InlineKeyboardMarkup
 
 from Bot_users import Users
@@ -42,15 +43,15 @@ keyboards = {
     ],
 }
 
-def bild_inline_keyboard(self_coord=None, list_bank_coordinates=None):
+def bild_inline_keyboard(self_coord=None, list_bank_coordinates=None, mode=0):
     #TODO проверка нанов
     sc = self_coord
     lbc = list_bank_coordinates
     atm_out = []
     n = 1
     for atm in lbc:
-        line = [InlineKeyboardButton("ATM {0}".format(n), callback_data='sln={0}slt{1}tln={2}tlt{3}'\
-            .format(sc[0],sc[1],atm['geo'][0],atm['geo'][1]))] #,atm['name']))]
+        line = [InlineKeyboardButton("ATM {0}".format(n), callback_data='mode={4}sln={0}slt{1}tln={2}tlt{3}'\
+            .format(sc[0], sc[1], atm['geo'][0], atm['geo'][1], mode))] #,atm['name']))]
         atm_out.append(line[0])
         n+=1
     print(atm_out)
@@ -79,14 +80,14 @@ def greet_user(bot, update):
 
 
 def f_cancel(bot, update):
+    print('f_cancel')
 
     user_id = update.message.chat.id
 
     users.reset_state(user_id)
     text = b_text.reset_t + '\n' + b_text.help_t
-    keyboard = keyboards['global_keyboard']
-    
 
+    keyboard = keyboards['global_keyboard']
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
@@ -98,9 +99,8 @@ def atm_search(bot, update):
     user_id = update.message.chat.id
     users.set_state(user_id, 'atm')
     text = b_text.atm_search_t
+
     keyboard = keyboards['atm_search_k'] 
-
-
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
@@ -125,31 +125,31 @@ def f_settings_get_location(bot, update, longitude, latitude):
 
 def f_atm_get_location(bot, update, longitude, latitude, atm):
     text, ld_of_atms = yandex.search_atm(longitude, latitude, atm)
-    #keyboard = keyboards['atm_out']
     reply_markup = bild_inline_keyboard([longitude, latitude], ld_of_atms) 
     update.message.reply_text(text, reply_markup=reply_markup)
+    f_cancel()
     
-def f_get_bank_name(bot, update):
-    user_id = update.message.chat.id
-   
-    state_user = users.get_state(user_id)
-
-    if state_user == 'atm':
-        searched_name == 'банкомат'
-    elif state_user == 'error' or state_user == None:
-        f_cancel()
-
-    if update.message.text != 'Любой ближайший':
-        print(update.message.text)
-        users.add_searched_name(user_id, update.message.text)
-        text = b_text.atm_search_get_name_t.format(update.message.text)
-    else:
-        users.add_searched_name(user_id, 'Банкомат')
-        text = b_text.atm_search_get_name_t.format(update.message.text)
-
-    keyboard = keyboards['need_geo']
-    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-    update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+#def f_get_bank_name(bot, update):
+#    user_id = update.message.chat.id
+#   
+#    state_user = users.get_state(user_id)
+#
+#    if state_user == 'atm':
+#        searched_name == 'банкомат'
+#    elif state_user == 'error' or state_user == None:
+#        f_cancel()
+#
+#    if update.message.text != 'Любой ближайший':
+#        print(update.message.text)
+#        users.add_searched_name(user_id, update.message.text)
+#        text = b_text.atm_search_get_name_t.format(update.message.text)
+#    else:
+#        users.add_searched_name(user_id, 'Банкомат')
+#        text = b_text.atm_search_get_name_t.format(update.message.text)
+#
+#    keyboard = keyboards['need_geo']
+#    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+#    update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
 
 def f_atm_get_bank_name(bot, update):
@@ -203,4 +203,12 @@ def proc_location(bot, update):
     else:
         f_cancel(bot, update)
 
+def f_callback(bot, update):
+    print('f_callback')
+    user_id = update.callback_query.message.chat.id
+    rs = re.findall(r'mode=(.)sln=(.*)slt(.*)tln=(.*)tlt(.*)', update.callback_query.data)
+    text = yandex.get_url_static_map(rs[0][1], rs[0][2], rs[0][3], rs[0][4])
+    keyboard = keyboards['global_keyboard']
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    bot.send_message(chat_id=user_id, text=text) #, reply_markup=reply_markup, parse_mode="Markdown")
 

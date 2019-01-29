@@ -88,3 +88,9 @@ class YandexApi:
         result = text #TODO обработать флаг результата
 
         return result, d_of_adress
+
+    def get_url_static_map(self, lng, lat, t_lng, t_lat):
+        url = 'https://static-maps.yandex.ru/1.x/?ll={0},{1}&l=map&pt={2},{3},pmywm~{0},{1},pmwtm'\
+            .format(lng, lat, t_lng, t_lat)
+
+        return url
