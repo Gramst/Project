@@ -29,6 +29,7 @@ keyboards = {
     [KeyboardButton('Отправить геолокацию', request_location=True)],
     ['Отмена']
     ],
+
     'atm_search_k' : 
     [
     ["Сбербанк", "ОТП Банк"],
@@ -36,6 +37,7 @@ keyboards = {
     ['Любой ближайший'],
     ['Отмена']
     ],
+
     'sett_keyboard' : 
     [
     [KeyboardButton('Тест гео', request_location=True)],
@@ -129,29 +131,6 @@ def f_atm_get_location(bot, update, longitude, latitude, atm):
     update.message.reply_text(text, reply_markup=reply_markup)
     f_cancel()
     
-#def f_get_bank_name(bot, update):
-#    user_id = update.message.chat.id
-#   
-#    state_user = users.get_state(user_id)
-#
-#    if state_user == 'atm':
-#        searched_name == 'банкомат'
-#    elif state_user == 'error' or state_user == None:
-#        f_cancel()
-#
-#    if update.message.text != 'Любой ближайший':
-#        print(update.message.text)
-#        users.add_searched_name(user_id, update.message.text)
-#        text = b_text.atm_search_get_name_t.format(update.message.text)
-#    else:
-#        users.add_searched_name(user_id, 'Банкомат')
-#        text = b_text.atm_search_get_name_t.format(update.message.text)
-#
-#    keyboard = keyboards['need_geo']
-#    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-#    update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
-
-
 def f_atm_get_bank_name(bot, update):
     user_id = update.message.chat.id
 
@@ -207,8 +186,8 @@ def f_callback(bot, update):
     print('f_callback')
     user_id = update.callback_query.message.chat.id
     rs = re.findall(r'mode=(.)sln=(.*)slt(.*)tln=(.*)tlt(.*)', update.callback_query.data)
-    text = '[банкомат](' + yandex.get_url_static_map(rs[0][1], rs[0][2], rs[0][3], rs[0][4]) + ')'
+    text = '[***Ссылка на карту***](' + yandex.get_url_static_map(rs[0][1], rs[0][2], rs[0][3], rs[0][4]) + ')'
     keyboard = keyboards['global_keyboard']
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-    bot.send_message(chat_id=user_id, text=text, parse_mode='Markdown') #, reply_markup=reply_markup, parse_mode="Markdown")
+    bot.send_message(chat_id=user_id, text=text, parse_mode='Markdown')
 
