@@ -92,7 +92,11 @@ class YandexApi:
         return result, d_of_adress
 
     def get_url_static_map(self, lng, lat, t_lng, t_lat):
-        url = 'https://static-maps.yandex.ru/1.x/?ll={0},{1}&l=map&pt={2},{3},pmywm~{0},{1},pmwtm'\
-            .format(lng, lat, t_lng, t_lat)
+        #url = 'https://static-maps.yandex.ru/1.x/?ll={0},{1}&l=map&pt={2},{3},pma~{0},{1},flag'\
+        #    .format(lng, lat, t_lng, t_lat)
+        lng_mid = (float(lng) + float(t_lng))/2
+        lat_mid = (float(lat) + float(t_lat))/2
+        url = 'https://static-maps.yandex.ru/1.x/?ll={4},{5}&l=map&pt={2},{3},pma~{0},{1},ya_ru'\
+            .format(lng, lat, t_lng, t_lat, lng_mid, lat_mid)
 
         return url
