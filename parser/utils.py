@@ -1,7 +1,8 @@
-from bs4 import BeautifulSoup
 import csv
-from datetime import datetime
 import os
+
+from datetime import datetime
+from bs4 import BeautifulSoup
 from selenium import webdriver
 
 import settings
