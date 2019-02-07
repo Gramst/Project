@@ -78,7 +78,7 @@ def bild_atm_keyboard(self_coord=None, list_bank_coordinates=None, mode=0):
     atm_out = []
     n = 1
     for atm in lbc:
-        line = [InlineKeyboardButton("ATM {0}".format(n), callback_data='mode={4}sln={0}slt{1}tln={2}tlt{3}'\
+        line = [InlineKeyboardButton("Место {0}".format(n), callback_data='mode={4}sln={0}slt{1}tln={2}tlt{3}'\
             .format(sc[0], sc[1], atm['geo'][0], atm['geo'][1], mode))] #,atm['name']))]
         atm_out.append(line[0])
         n+=1
@@ -174,7 +174,7 @@ def f_atm_get_bank_name(bot, update):
         print(update.message.text)
         users.add_searched_name(user_id, update.message.text)
     else:
-        users.add_searched_name(user_id, 'Банкомат')
+        users.add_searched_name(user_id, ' ')
 
     text = b_text.atm_search_get_name_t.format(update.message.text)
 
@@ -182,6 +182,20 @@ def f_atm_get_bank_name(bot, update):
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
+def f_money_get_bank_name(bot, update):
+    user_id = update.message.chat.id
+
+    if update.message.text != 'Любой ближайший':
+        print(update.message.text)
+        users.add_searched_name(user_id, update.message.text)
+    else:
+        users.add_searched_name(user_id, ' ')
+
+    text = b_text.money_search_get_name_t.format(update.message.text)
+
+    keyboard = keyboards['need_geo']
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
 def proc_message(bot, update):
 
@@ -189,11 +203,14 @@ def proc_message(bot, update):
     state = users.get_state(user_id)
     print(state)
 
-    if state == 'error':
+    if state == 'error' or update.message.text == 'Отмена':
         f_cancel(bot, update)
 
     elif state == 'atm':
         f_atm_get_bank_name(bot, update)
+
+    elif state == 'money':
+        f_money_get_bank_name(bot, update)
 
     else:
         greet_user(bot, update)
@@ -212,8 +229,14 @@ def proc_location(bot, update):
         f_settings_get_location(bot, update, longitude, latitude)
 
     elif state == 'atm':
-        atm = users.get_searched_name(user_id)
+        atm = users.get_searched_name(user_id) + ' банкомат'
+        print(atm)
         f_atm_get_location(bot, update, longitude, latitude, atm)
+
+    elif state == 'money':
+        money =users.get_searched_name(user_id) + ' обменник'
+        print(money)
+        f_atm_get_location(bot, update, longitude, latitude, money)
 
     else:
         f_cancel(bot, update)
@@ -237,6 +260,8 @@ def f_callback(bot, update):
         _f_select_valut(bot, user_id, update.callback_query.data, message_id)
     if rs[0][0] == '3':
         _f_get_bank_list_button(bot, user_id, update.callback_query.data, message_id)
+    if rs[0][0] == '4':
+        _f_get_bank_list(bot, user_id, update.callback_query.data, message_id, update)
 
 def _f_get_map(bot, user_id, income_callback_data):
     print('_f_get_map')
@@ -273,7 +298,21 @@ def _f_get_bank_list_button(bot, user_id, income_callback_data, message_id):
     money = {}
     money[1] = {}
     money[1]['name'] = 'Искать гор. {0} пара:{1}'.format(rs[0][1], rs[0][2])
-    money[1]['call'] = 'mode=3city={0}val=rur_usd'.format(rs[0][1])
+    money[1]['call'] = 'mode=4city={0}val=rur_usd'.format(rs[0][1])
     reply_markup = bild_keyboard(money, 1) 
     
     bot.edit_message_reply_markup(chat_id=user_id, message_id=message_id, reply_markup=reply_markup)
+
+def _f_get_bank_list(bot, user_id, income_callback_data, message_id, update):
+    rs = re.findall(r'mode=(.)city=(.{3})val=(.{7})', income_callback_data)
+    state = users.get_state(user_id)
+    print(state)
+    text = 'Вот тут текст сгенерированный из выдачи csv файла'
+    keyboard =  [
+    ["Сбербанк", "БПС Сбербанк"],
+    ["Райфайзен", "Приорбанк"],
+    ['Отмена']
+    ]    
+
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    bot.send_message(chat_id=user_id, text=text,  reply_markup=reply_markup, parse_mode='Markdown')
