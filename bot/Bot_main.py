@@ -5,7 +5,7 @@ import random
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, RegexHandler, CallbackQueryHandler
 
 import Bot_settings as sett
-from Handlers import greet_user, atm_search, user_settings, proc_location, f_cancel, proc_location, proc_message, f_callback
+from Handlers import greet_user, atm_search, user_settings, proc_location, f_cancel, proc_location, proc_message, f_callback, money_exchange
 from Bot_users import Users
 from Yandex_api import YandexApi
 
@@ -30,6 +30,7 @@ def main():
     dp.add_handler(CommandHandler("start", greet_user))
 
     dp.add_handler(RegexHandler('^(Найти банкомат)$', atm_search))
+    dp.add_handler(RegexHandler('^(Обмен валюты)$', money_exchange))
     dp.add_handler(RegexHandler('^(Настройки)$', user_settings))
     dp.add_handler(RegexHandler('^(Отмена)$', f_cancel))
 

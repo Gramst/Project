@@ -24,6 +24,12 @@ keyboards = {
     ["Поиск вклада", "Настройки"]
     ],
 
+    'money_search_k' :
+    [
+    ["Волгоград", "Брест"],
+    ['Отмена']
+    ],
+
     'need_geo' : 
     [
     [KeyboardButton('Отправить геолокацию', request_location=True)],
@@ -32,8 +38,8 @@ keyboards = {
 
     'atm_search_k' : 
     [
-    ["Сбербанк", "ОТП Банк"],
-    ["Райфайзен", "Тула Банк"],
+    ["Сбербанк", "БПС Сбербанк"],
+    ["Райфайзен", "Приорбанк"],
     ['Любой ближайший'],
     ['Отмена']
     ],
@@ -45,7 +51,27 @@ keyboards = {
     ],
 }
 
-def bild_inline_keyboard(self_coord=None, list_bank_coordinates=None, mode=0):
+def bild_keyboard(buttons=None, row=2):
+#buttons = { 'name': ... 'call' : .... }
+    atm_out = []
+    lbc = buttons
+    n = 1
+    for i in lbc:
+        line = [InlineKeyboardButton("{0}".format(lbc[i]['name']), callback_data='{0}'\
+            .format( lbc[i]['call']))]
+        atm_out.append(line[0])
+        n+=1
+    print(atm_out)
+    menu = [] 
+    i = 0
+    while i<len(atm_out):
+        menu.append(atm_out[i:i+row])
+        i+=row
+    print(menu)
+    reply_markup = InlineKeyboardMarkup(menu)
+    return reply_markup
+
+def bild_atm_keyboard(self_coord=None, list_bank_coordinates=None, mode=0):
     #TODO проверка нанов
     sc = self_coord
     lbc = list_bank_coordinates
@@ -81,20 +107,31 @@ def greet_user(bot, update):
     update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
 
-def f_cancel(bot, update):
+def f_cancel(bot, update, text=b_text.reset_t + '\n' + b_text.help_t):
     print('f_cancel')
 
     user_id = update.message.chat.id
 
     users.reset_state(user_id)
-    text = b_text.reset_t + '\n' + b_text.help_t
 
     keyboard = keyboards['global_keyboard']
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
 def money_exchange(bot, update):
-    pass
+    user_id = update.message.chat.id
+    users.set_state(user_id, 'money')
+    text = b_text.money
+    city = {}
+    city[1] = {}
+    city[1]['name'] = 'Волгоград'
+    city[1]['call'] = 'mode=2city=VLG'
+    city[2] = {}
+    city[2]['name'] = 'Брест'
+    city[2]['call'] = 'mode=2city=BST'
+    reply_markup = bild_keyboard(city, 1) 
+    update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
 
 
 def atm_search(bot, update):
@@ -127,9 +164,8 @@ def f_settings_get_location(bot, update, longitude, latitude):
 
 def f_atm_get_location(bot, update, longitude, latitude, atm):
     text, ld_of_atms = yandex.search_atm(longitude, latitude, atm)
-    reply_markup = bild_inline_keyboard([longitude, latitude], ld_of_atms) 
+    reply_markup = bild_atm_keyboard([longitude, latitude], ld_of_atms) 
     update.message.reply_text(text, reply_markup=reply_markup)
-    f_cancel()
     
 def f_atm_get_bank_name(bot, update):
     user_id = update.message.chat.id
@@ -183,11 +219,55 @@ def proc_location(bot, update):
         f_cancel(bot, update)
 
 def f_callback(bot, update):
+#"""
+#mode:
+#0-получить карту
+#5-изменить список банков
+#"""
     print('f_callback')
     user_id = update.callback_query.message.chat.id
-    rs = re.findall(r'mode=(.)sln=(.*)slt(.*)tln=(.*)tlt(.*)', update.callback_query.data)
+    rs = re.findall(r'mode=(.)', update.callback_query.data)
+    if rs[0][0] == '0':
+        _f_get_map(bot, user_id, update.callback_query.data)
+    if rs[0][0] == '5':
+        _f_users_set_new_bank_list(bot, user_id, update.callback_query.data)
+    if rs[0][0] == '2':
+        _f_select_valut(bot, user_id, update.callback_query.data)
+    if rs[0][0] == '3':
+        _f_get_bank_list(bot, user_id, update.callback_query.data)
+
+def _f_get_map(bot, user_id, income_callback_data):
+    print('_f_get_map')
+    rs = re.findall(r'mode=(.)sln=(.*)slt(.*)tln=(.*)tlt(.*)', income_callback_data)
     text = '[***Ссылка на карту***](' + yandex.get_url_static_map(rs[0][1], rs[0][2], rs[0][3], rs[0][4]) + ')'
     keyboard = keyboards['global_keyboard']
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     bot.send_message(chat_id=user_id, text=text, parse_mode='Markdown')
 
+def _f_select_valut(bot, user_id, income_callback_data):
+    print('_f_get_map')
+    rs = re.findall(r'mode=(.)city=(...)', income_callback_data)
+    print(rs[0][1])
+    text = 'Выберите валютную пару'
+    money = {}
+    money[1] = {}
+    money[1]['name'] = 'RUB->USD'
+    money[1]['call'] = 'mode=3city={0}val=rur_usd'.format(rs[0][1])
+    money[2] = {}
+    money[2]['name'] = 'RUB->EUR'
+    money[2]['call'] = 'mode=3city={0}val=rur_eur'.format(rs[0][1])
+    money[3] = {}
+    money[3]['name'] = 'USD->RUB'
+    money[3]['call'] = 'mode=3city={0}val=usd_rur'.format(rs[0][1])
+    money[4] = {}
+    money[4]['name'] = 'EUR->RUB'
+    money[4]['call'] = 'mode=3city={0}val=eur_rur'.format(rs[0][1])
+    reply_markup = bild_keyboard(money, 2) 
+    #update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+    bot.send_message(chat_id=user_id, reply_markup=reply_markup, text=text, parse_mode='Markdown')
+
+
+#def _f_users_set_new_bank_list(bot, user_id, update.callback_query.data):
+#    pass
+def _f_get_bank_list(bot, user_id, income_callback_data):
+    pass

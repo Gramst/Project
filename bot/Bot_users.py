@@ -33,7 +33,8 @@ class Users:
                                             'geo' : False,
                                             'atm' : False,
                                             'money' : False,
-                                            'sett' : False
+                                            'sett' : False,
+                                            'atm_list': ['Сбербанк', 'ВТБ', 'Альфа-банк', 'БТА Банк'] 
                                             }
 
     def users_save(self):
@@ -76,4 +77,11 @@ class Users:
         self.check_user(user_id)
         return self.users[user_id]['atm']
 
-
+    def get_bank_list(self, user_id):
+        self.check_user(user_id)
+        return self.users[user_id]['atm_list']
+        
+    def reset_bank_list(self, user_id):
+        self.check_user(user_id)
+        self.users[user_id]['atm_list'] = ['Сбербанк', 'ВТБ', 'Альфа-банк', 'БТА Банк']
+        return self.users[user_id]['atm_list']
