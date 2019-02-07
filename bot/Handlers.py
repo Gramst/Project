@@ -226,15 +226,17 @@ def f_callback(bot, update):
 #"""
     print('f_callback')
     user_id = update.callback_query.message.chat.id
+    message_id = update.callback_query.message.message_id
+
     rs = re.findall(r'mode=(.)', update.callback_query.data)
     if rs[0][0] == '0':
         _f_get_map(bot, user_id, update.callback_query.data)
     if rs[0][0] == '5':
         _f_users_set_new_bank_list(bot, user_id, update.callback_query.data)
     if rs[0][0] == '2':
-        _f_select_valut(bot, user_id, update.callback_query.data)
+        _f_select_valut(bot, user_id, update.callback_query.data, message_id)
     if rs[0][0] == '3':
-        _f_get_bank_list(bot, user_id, update.callback_query.data)
+        _f_get_bank_list_button(bot, user_id, update.callback_query.data, message_id)
 
 def _f_get_map(bot, user_id, income_callback_data):
     print('_f_get_map')
@@ -244,11 +246,10 @@ def _f_get_map(bot, user_id, income_callback_data):
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     bot.send_message(chat_id=user_id, text=text, parse_mode='Markdown')
 
-def _f_select_valut(bot, user_id, income_callback_data):
+def _f_select_valut(bot, user_id, income_callback_data, message_id):
     print('_f_get_map')
     rs = re.findall(r'mode=(.)city=(...)', income_callback_data)
     print(rs[0][1])
-    text = 'Выберите валютную пару'
     money = {}
     money[1] = {}
     money[1]['name'] = 'RUB->USD'
@@ -264,10 +265,15 @@ def _f_select_valut(bot, user_id, income_callback_data):
     money[4]['call'] = 'mode=3city={0}val=eur_rur'.format(rs[0][1])
     reply_markup = bild_keyboard(money, 2) 
     #update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
-    bot.send_message(chat_id=user_id, reply_markup=reply_markup, text=text, parse_mode='Markdown')
+    bot.edit_message_reply_markup(chat_id=user_id, message_id=message_id, reply_markup=reply_markup)
 
 
-#def _f_users_set_new_bank_list(bot, user_id, update.callback_query.data):
-#    pass
-def _f_get_bank_list(bot, user_id, income_callback_data):
-    pass
+def _f_get_bank_list_button(bot, user_id, income_callback_data, message_id):
+    rs = re.findall(r'mode=(.)city=(.{3})val=(.{7})', income_callback_data)
+    money = {}
+    money[1] = {}
+    money[1]['name'] = 'Искать гор. {0} пара:{1}'.format(rs[0][1], rs[0][2])
+    money[1]['call'] = 'mode=3city={0}val=rur_usd'.format(rs[0][1])
+    reply_markup = bild_keyboard(money, 1) 
+    
+    bot.edit_message_reply_markup(chat_id=user_id, message_id=message_id, reply_markup=reply_markup)
