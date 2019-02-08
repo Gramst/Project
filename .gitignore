@@ -1,6 +1,16 @@
 bot/Bot_settings.py
+vnv/*
 *.pyc
 bot/bot.log
 bot/venv/*
 bot/.idea/*
 bot/data/*
+.venv/*
+.ipynb_checkpoints/*
+*.ipynb
+Jupyter_tests/*
+.*
+test/*
+search/*
+*.py~
+bot/*.py~
