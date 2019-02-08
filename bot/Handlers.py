@@ -5,9 +5,11 @@ from Bot_users import Users
 from Yandex_api import YandexApi
 import Bot_text as b_text
 import Bot_settings as sett
+import cvs_read as csvr
 
 users = Users(sett.PATH)
 yandex = YandexApi(sett.Y_TOKEN, sett.PATH)
+cities_d = csvr.get_dict()
 
 keyboards = {
 
@@ -21,7 +23,7 @@ keyboards = {
     'global_keyboard' : 
     [
     ["Обмен валюты", "Найти банкомат"],
-    ["Поиск вклада", "Настройки"]
+    [ "Настройки"]
     ],
 
     'money_search_k' :
@@ -50,6 +52,20 @@ keyboards = {
     ["Отмена"]
     ],
 }
+def bild_keyboard_low(buttons=None, row=2):
+#buttons = { 'name': ... 'call' : .... }
+    atm_out = buttons
+    print(atm_out)
+    menu = [] 
+    i = 0
+    while i<len(atm_out):
+        menu.append(atm_out[i:i+row])
+        i+=row
+    menu.append(['Отмена'])
+    print(menu)
+    return menu
+
+
 
 def bild_keyboard(buttons=None, row=2):
 #buttons = { 'name': ... 'call' : .... }
@@ -307,12 +323,15 @@ def _f_get_bank_list(bot, user_id, income_callback_data, message_id, update):
     rs = re.findall(r'mode=(.)city=(.{3})val=(.{7})', income_callback_data)
     state = users.get_state(user_id)
     print(state)
-    text = 'Вот тут текст сгенерированный из выдачи csv файла'
-    keyboard =  [
-    ["Сбербанк", "БПС Сбербанк"],
-    ["Райфайзен", "Приорбанк"],
-    ['Отмена']
-    ]    
+    dict_to_send = csvr.get_kurs(cities_d, rs[0][1], rs[0][2])
+    print(dict_to_send)
+    menu = []
+    text = 'Выберите обменник:\n\n'
+    for i in dict_to_send:
+        text +=' {0:<20} курс **{1}**\n\n'.format(i, dict_to_send[i])
+        menu.append(i)
+    keyboard = bild_keyboard_low(menu)
 
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     bot.send_message(chat_id=user_id, text=text,  reply_markup=reply_markup, parse_mode='Markdown')
+

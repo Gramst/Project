@@ -63,17 +63,20 @@ class YandexApi:
     def _get_search_adress_from_raw(self, raw_data):
         atms = []
         for company in raw_data['features']:
-            atm = {}
-            atm['name'] = company['properties']['name']
-            print('atm_data')
-            print(atm['name'])
-            atm['geo'] = company['geometry']['coordinates']
-            print(atm['geo'])
-            atm['time'] = company['properties']['CompanyMetaData']['Hours']['text']
-            print(atm['time'])
-            atm['address'] = company['properties']['CompanyMetaData']['address']
-            print(atm['address'])
-            atms.append(atm)
+            try:
+                atm = {}
+                atm['name'] = company['properties']['name']
+                print('atm_data')
+                print(atm['name'])
+                atm['geo'] = company['geometry']['coordinates']
+                print(atm['geo'])
+                atm['time'] = company['properties']['CompanyMetaData']['Hours']['text']
+                print(atm['time'])
+                atm['address'] = company['properties']['CompanyMetaData']['address']
+                print(atm['address'])
+                atms.append(atm)
+            except KeyError:
+                continue
         text = ''
         n = 1
         for atm in atms:
