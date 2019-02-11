@@ -1,8 +1,8 @@
 import re
 from telegram import ReplyKeyboardMarkup, KeyboardButton,InlineKeyboardButton, InlineKeyboardMarkup
 
-from Bot_users import Users
-from Yandex_api import YandexApi
+from users_bot import Users
+from api_yandex import YandexApi
 import Bot_text as b_text
 import Bot_settings as sett
 import cvs_read as csvr

@@ -5,9 +5,9 @@ import random
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, RegexHandler, CallbackQueryHandler
 
 import Bot_settings as sett
-from Handlers import greet_user, atm_search, user_settings, proc_location, f_cancel, proc_location, proc_message, f_callback, money_exchange
-from Bot_users import Users
-from Yandex_api import YandexApi
+from handlers import greet_user, atm_search, user_settings, proc_location, f_cancel, proc_location, proc_message, f_callback, money_exchange
+from users_bot import Users
+from api_yandex import YandexApi
 
 users = Users(sett.PATH)
 yandex = YandexApi(sett.Y_TOKEN, sett.PATH)
