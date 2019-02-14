@@ -1,4 +1,5 @@
 import re
+import logging
 from telegram import ReplyKeyboardMarkup, KeyboardButton,InlineKeyboardButton, InlineKeyboardMarkup
 
 from users_bot import Users
@@ -10,6 +11,7 @@ import cvs_read as csvr
 users = Users(sett.PATH)
 yandex = YandexApi(sett.Y_TOKEN, sett.PATH)
 cities_d = csvr.get_dict()
+mod_log = logging.getLogger('Handlers')
 
 keyboards = {
 
@@ -55,14 +57,14 @@ keyboards = {
 def bild_keyboard_low(buttons=None, row=2):
 #buttons = { 'name': ... 'call' : .... }
     atm_out = buttons
-    print(atm_out)
+    mod_log.info(atm_out)
     menu = [] 
     i = 0
     while i<len(atm_out):
         menu.append(atm_out[i:i+row])
         i+=row
     menu.append(['Отмена'])
-    print(menu)
+    mod_log.info(menu)
     return menu
 
 
@@ -77,13 +79,13 @@ def bild_keyboard(buttons=None, row=2):
             .format( lbc[i]['call']))]
         atm_out.append(line[0])
         n+=1
-    print(atm_out)
+    mod_log.info(atm_out)
     menu = [] 
     i = 0
     while i<len(atm_out):
         menu.append(atm_out[i:i+row])
         i+=row
-    print(menu)
+    mod_log.info(menu)
     reply_markup = InlineKeyboardMarkup(menu)
     return reply_markup
 
@@ -98,13 +100,13 @@ def bild_atm_keyboard(self_coord=None, list_bank_coordinates=None, mode=0):
             .format(sc[0], sc[1], atm['geo'][0], atm['geo'][1], mode))] #,atm['name']))]
         atm_out.append(line[0])
         n+=1
-    print(atm_out)
+    mod_log.info(atm_out)
     menu = [] 
     i = 0
     while i<len(atm_out):
         menu.append(atm_out[i:i+3])
         i+=3
-    print(menu)
+    mod_log.info(menu)
     reply_markup = InlineKeyboardMarkup(menu)
     return reply_markup
 
@@ -124,7 +126,7 @@ def greet_user(bot, update):
 
 
 def f_cancel(bot, update, text=b_text.reset_t + '\n' + b_text.help_t):
-    print('f_cancel')
+    mod_log.info('f_cancel')
 
     user_id = update.message.chat.id
 
@@ -187,7 +189,7 @@ def f_atm_get_bank_name(bot, update):
     user_id = update.message.chat.id
 
     if update.message.text != 'Любой ближайший':
-        print(update.message.text)
+        mod_log.info(update.message.text)
         users.add_searched_name(user_id, update.message.text)
     else:
         users.add_searched_name(user_id, ' ')
@@ -202,7 +204,7 @@ def f_money_get_bank_name(bot, update):
     user_id = update.message.chat.id
 
     if update.message.text != 'Любой ближайший':
-        print(update.message.text)
+        mod_log.info(update.message.text)
         users.add_searched_name(user_id, update.message.text)
     else:
         users.add_searched_name(user_id, ' ')
@@ -217,7 +219,7 @@ def proc_message(bot, update):
 
     user_id = update.message.chat.id
     state = users.get_state(user_id)
-    print(state)
+    mod_log.info(state)
 
     if state == 'error' or update.message.text == 'Отмена':
         f_cancel(bot, update)
@@ -239,19 +241,19 @@ def proc_location(bot, update):
     latitude = update.message.location['latitude']
 
     state = users.get_state(user_id)
-    print(state)
+    mod_log.info(state)
 
     if state == 'sett' :
         f_settings_get_location(bot, update, longitude, latitude)
 
     elif state == 'atm':
         atm = users.get_searched_name(user_id) + ' банкомат'
-        print(atm)
+        mod_log.info(atm)
         f_atm_get_location(bot, update, longitude, latitude, atm)
 
     elif state == 'money':
         money =users.get_searched_name(user_id) + ' обменник'
-        print(money)
+        mod_log.info(money)
         f_atm_get_location(bot, update, longitude, latitude, money)
 
     else:
@@ -263,7 +265,7 @@ def f_callback(bot, update):
 #0-получить карту
 #5-изменить список банков
 #"""
-    print('f_callback')
+    mod_log.info('f_callback')
     user_id = update.callback_query.message.chat.id
     message_id = update.callback_query.message.message_id
 
@@ -280,7 +282,7 @@ def f_callback(bot, update):
         _f_get_bank_list(bot, user_id, update.callback_query.data, message_id, update)
 
 def _f_get_map(bot, user_id, income_callback_data):
-    print('_f_get_map')
+    mod_log.info('_f_get_map')
     rs = re.findall(r'mode=(.)sln=(.*)slt(.*)tln=(.*)tlt(.*)', income_callback_data)
     text = '[***Ссылка на карту***](' + yandex.get_url_static_map(rs[0][1], rs[0][2], rs[0][3], rs[0][4]) + ')'
     keyboard = keyboards['global_keyboard']
@@ -288,9 +290,9 @@ def _f_get_map(bot, user_id, income_callback_data):
     bot.send_message(chat_id=user_id, text=text, parse_mode='Markdown')
 
 def _f_select_valut(bot, user_id, income_callback_data, message_id):
-    print('_f_get_map')
+    mod_log.info('_f_get_map')
     rs = re.findall(r'mode=(.)city=(...)', income_callback_data)
-    print(rs[0][1])
+    mod_log.info(rs[0][1])
     money = {}
     money[1] = {}
     money[1]['name'] = 'RUB->USD'
@@ -322,9 +324,9 @@ def _f_get_bank_list_button(bot, user_id, income_callback_data, message_id):
 def _f_get_bank_list(bot, user_id, income_callback_data, message_id, update):
     rs = re.findall(r'mode=(.)city=(.{3})val=(.{7})', income_callback_data)
     state = users.get_state(user_id)
-    print(state)
+    mod_log.info(state)
     dict_to_send = csvr.get_kurs(cities_d, rs[0][1], rs[0][2])
-    print(dict_to_send)
+    mod_log.info(dict_to_send)
     menu = []
     text = 'Выберите обменник:\n\n'
     for i in dict_to_send:

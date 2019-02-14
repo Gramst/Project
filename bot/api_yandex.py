@@ -1,11 +1,15 @@
 import requests
 import json
+import logging
 
 # https://geocode-maps.yandex.ru/1.x
 # https://geocode-maps.yandex.ru/1.x/?apikey=<Ваш API-ключ>&format=json&geocode=Тверская+6
 # https://geocode-maps.yandex.ru/1.x/?apikey=<Ваш API-ключ>&geocode=Ивановка&ll=37.618920,55.756994&spn=3.552069,2.400552
 # https://geocode-maps.yandex.ru/1.x/?apikey=<Ваш API-ключ>&geocode=37.611347,55.760241
 # {'longitude': 44.5458, 'latitude': 48.512331}
+
+
+api_log = logging.getLogger('Yandex api')
 
 class YandexApi:
 
@@ -66,14 +70,14 @@ class YandexApi:
             try:
                 atm = {}
                 atm['name'] = company['properties']['name']
-                print('atm_data')
-                print(atm['name'])
+                api_log.info('atm_data')
+                api_log.info(atm['name'])
                 atm['geo'] = company['geometry']['coordinates']
-                print(atm['geo'])
+                api_log.info(atm['geo'])
                 atm['time'] = company['properties']['CompanyMetaData']['Hours']['text']
-                print(atm['time'])
+                api_log.info(atm['time'])
                 atm['address'] = company['properties']['CompanyMetaData']['address']
-                print(atm['address'])
+                api_log.info(atm['address'])
                 atms.append(atm)
             except KeyError:
                 continue
